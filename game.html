@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rock Paper Scissors - FULLY FUNCTIONAL</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    integrity="sha512-1ycn6i+7kmAUa9tvu2luXuJqCuwJg3WyKyqsQc9Rm6GaIOgl/KxiRuoDyGRoSsL9imyO69cz0uMxPI5FwiBOcg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display.swap" rel="stylesheet">
+  <style>
+    /* General Styles with NEW BACKGROUND */
+    body {
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.7;
+      margin: 0;
+      padding: 0;
+      color: #37474F;
+      overflow-x: hidden;
+      /* --- MODIFICATION START --- */
+      background: linear-gradient(-45deg, #23a6d5, #23d5ab, #ee7752, #e73c7e);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      /* --- MODIFICATION END --- */
+    }
+
+    /* Keyframes for the new animated background */
+    @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      position: relative;
+      text-align: center;
+    }
+
+    /* Heading Styles */
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #2962FF;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Score Display */
+    .score {
+      font-size: 1.5em;
+      margin-bottom: 10px; /* Reduced margin */
+      color: #4CAF50;
+    }
+
+    /* Round Counter */
+    .round-counter {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        color: #795548;
+    }
+
+    /* Result Display */
+    .result {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #FF5722;
+    }
+
+    /* 3D Button Styles */
+    .button-3d {
+      display: inline-block;
+      padding: 12px 24px;
+      font-size: 1.3em;
+      font-weight: 600;
+      color: #fff;
+      background-color: #2962FF;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      margin: 10px;
+      min-width: 150px;
+      text-align: center;
+    }
+
+    .button-3d:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .button-3d:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Specific Button Colors */
+    .button-rock {
+      background-color: #E64A19;
+    }
+
+    .button-paper {
+      background-color: #2E7D32;
+    }
+
+    .button-scissors {
+      background-color: #512DA8;
+    }
+
+    /* Choice Images */
+    .choice-image {
+      width: 120px;
+      height: 120px;
+      margin: 10px;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      object-fit: cover;
+      transition: transform 0.1s ease-in-out; /* For highlight effect */
+    }
+
+    .choice-image.highlighted {
+        transform: scale(1.1); /* Slightly larger */
+    }
+
+    /* Final Winner Message */
+    .final-winner {
+      font-size: 2em;
+      font-weight: bold;
+      color: #2962FF;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      margin-top: 30px;
+    }
+
+    /* Restart/Scoreboard Buttons */
+    .restart-buttons {
+      margin-top: 30px;
+    }
+
+    /* Animate.css Integration */
+    .animate__animated {
+      animation-duration: 0.7s;
+      animation-fill-mode: both;
+    }
+
+    #gameOverOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 10;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+      font-size: 2em;
+      text-align: center;
+    }
+
+    #gameOverOverlay .final-score {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #fff;
+
+    }
+
+    #gameOverOverlay .button-3d {
+      font-size: 1em;
+      margin: 10px;
+
+    }
+
+    /* Previous Games Scoreboard */
+    #scoreboardOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 11;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    #scoreboardOverlay h2 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    #scoreboardOverlay ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #scoreboardOverlay li {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #scoreboardOverlay .button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    #scoreboardOverlay .button-container .button-3d {
+      margin: 0 10px; /* Add some horizontal spacing between buttons */
+    }
+
+    /* Clear Scoreboard Button */
+    #clearScoreboardButton {
+      padding: 8px 16px;
+      background-color: #D32F2F; /* Red */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
+    }
+
+    #clearScoreboardButton:hover {
+      background-color: #B71C1C; /* Darker Red */
+    }
+
+    #scoreboardOverlay .close-button {
+      padding: 8px 16px;
+      background-color: #3949AB;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
+    }
+
+    #scoreboardOverlay .close-button:hover {
+      background-color: #1A237E;
+    }
+
+    .choices {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* Choice Images - IMPORTANT: Initially Hidden */
+     #rockImage, #paperImage, #scissorsImage, #computerChoiceImage {
+          width: 120px;
+          height: 120px;
+          margin: 10px;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          object-fit: cover;
+          display: none; /* IMPORTANT: Initially Hidden */
+        }
+  </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Rock Paper Scissors</h1>
+        <p class="score">Your Score: <span id="userScore">0</span> | Computer Score: <span
+                id="computerScore">0</span></p>
+        <p class="round-counter">Round: <span id="roundNumber">0</span> / <span id="maxRoundsDisplay">3</span></p>
+        <p class="result" id="resultMessage"></p>
+
+        <div class="choices">
+            <img src="C:\Users\hi\Desktop\rockpaperscissors\rock.JPG" alt="Rock" class="choice-image" id="rockImage">
+            <img src="C:\Users\hi\Desktop\rockpaperscissors\paper.JPG" alt="Paper" class="choice-image" id="paperImage">
+            <img src="C:\Users\hi\Desktop\rockpaperscissors\scissor.JPG" alt="Scissors" class="choice-image" id="scissorsImage">
+            <img src="" alt="Computer Choice" class="choice-image" id="computerChoiceImage">
+        </div>
+
+        <button class="button-3d button-rock" onclick="playGame('rock')"><i class="fas fa-hand-rock"></i>
+            Rock</button>
+        <button class="button-3d button-paper" onclick="playGame('paper')"><i class="fas fa-hand-paper"></i>
+            Paper</button>
+        <button class="button-3d button-scissors" onclick="playGame('scissors')"><i
+                class="fas fa-hand-scissors"></i> Scissors</button>
+
+        <p class="final-winner" id="finalWinner" style="display:none;"></p>
+
+    </div>
+
+    <div id="gameOverOverlay">
+        <p id="gameOverMessage" class="final-winner"></p>
+        <p class="final-score">Your Score: <span id="finalUserScore">0</span> | Computer Score: <span
+                id="finalComputerScore">0</span></p>
+        <div class="restart-buttons">
+            <button class="button-3d button-primary" onclick="restartGame()">Yes, Restart!</button>
+            <button class="button-3d button-secondary" onclick="showScoreboard()">No, Show Scoreboard</button>
+        </div>
+    </div>
+
+    <div id="scoreboardOverlay">
+        <h2>Previous Games</h2>
+        <ul id="scoreboardList"></ul>
+        <p id="comeBackMessage" style="display: none;">You're awesome! Ready to play again?</p>
+        <div class="button-container" id="scoreboardButtons" style="display: none;">
+            <button class="button-3d button-primary" onclick="restartGame()">Yes, Again!</button>
+            <button class="button-3d button-secondary" onclick="closeScoreboard()">No, Thanks</button>
+        </div>
+        <button class="close-button" onclick="goBack()">Go Back</button>
+        <button id="clearScoreboardButton" onclick="clearScoreboard()">ClearScoreboard</button>
+    </div>
+
+    <script>
+        let userScore = 0;
+        let computerScore = 0;
+        let round = 0;
+        const maxRounds = 3;
+
+        const userScoreSpan = document.getElementById("userScore");
+        const computerScoreSpan = document.getElementById("computerScore");
+        const resultMessage = document.getElementById("resultMessage");
+        const finalWinnerMessage = document.getElementById("finalWinner");
+        const roundNumberSpan = document.getElementById("roundNumber");
+        const maxRoundsDisplay = document.getElementById("maxRoundsDisplay");
+
+        const rockImage = document.getElementById("rockImage");
+        const paperImage = document.getElementById("paperImage");
+        const scissorsImage = document.getElementById("scissorsImage");
+        const computerChoiceImage = document.getElementById("computerChoiceImage");
+
+        const gameOverOverlay = document.getElementById("gameOverOverlay");
+        const gameOverMessage = document.getElementById("gameOverMessage");
+        const finalUserScore = document.getElementById("finalUserScore");
+        const finalComputerScore = document.getElementById("finalComputerScore");
+
+        const scoreboardOverlay = document.getElementById("scoreboardOverlay");
+        const scoreboardList = document.getElementById("scoreboardList");
+        const comeBackMessage = document.getElementById("comeBackMessage");
+        const scoreboardButtons = document.getElementById("scoreboardButtons");
+
+        let gameHistory = JSON.parse(localStorage.getItem("gameHistory")) || [];
+
+         const imagePaths = {
+              rock: "C:\\Users\\hi\\Desktop\\rockpaperscissors\\rock.JPG",
+              paper: "C:\\Users\\hi\\Desktop\\rockpaperscissors\\paper.JPG",
+              scissors: "C:\\Users\\hi\\Desktop\\rockpaperscissors\\scissor.JPG"
+            };
+
+        maxRoundsDisplay.innerText = maxRounds;  //Initialize display
+
+        function getComputerChoice() {
+            const choices = ['rock', 'paper', 'scissors'];
+            const randomNumber = Math.floor(Math.random() * 3);
+            return choices[randomNumber];
+        }
+
+
+        function showChoiceImage(userChoice, computerChoice) {
+            // Set image paths for both the user and computer choices
+            const userImagePath = imagePaths[userChoice] || "";  //dynamically grab image
+            const computerImagePath = imagePaths[computerChoice] || "";
+            rockImage.src = imagePaths['rock'] || "";
+            paperImage.src = imagePaths['paper'] || "";
+            scissorsImage.src = imagePaths['scissors'] || "";
+            computerChoiceImage.src = imagePaths[computerChoice] || "";
+
+
+        //Clear previous image
+            rockImage.style.display = 'none';
+          paperImage.style.display = 'none';
+          scissorsImage.style.display = 'none';
+            computerChoiceImage.style.display = 'none';
+
+            //Display based the choice
+            if (userChoice === 'rock') {
+                rockImage.style.display = 'inline';
+                highlightChoice(rockImage);
+
+            } else if (userChoice === 'paper') {
+                paperImage.style.display = 'inline';
+                highlightChoice(paperImage);
+
+
+            } else {
+                scissorsImage.style.display = 'inline';
+                highlightChoice(scissorsImage);
+            }
+
+                computerChoiceImage.style.display = "inline";
+                computerChoiceImage.src = imagePaths[computerChoice]; // Set the computer's image source
+
+                //Animate It
+            const choicesImg  = document.querySelector(".choices");
+           choicesImg.classList.add("animate__animated", "animate_zoomIn");
+           setTimeout(()=>{
+                choicesImg.classList.remove("animate__animated", "animate_zoomIn");
+
+           },1000);
+
+            // Computer displays image after user, for now leave as-is.
+
+}
+
+        function highlightChoice(element) {
+            // Remove highlight from any previously highlighted element
+            const highlighted = document.querySelector('.choice-image.highlighted');
+            if (highlighted) {
+                highlighted.classList.remove('highlighted');
+            }
+
+            // Add highlight to the current element
+            element.classList.add('highlighted');
+
+            // Remove highlight after a short delay
+            setTimeout(() => {
+                element.classList.remove('highlighted');
+            }, 500); // Adjust the delay as needed
+
+        }
+
+
+        function game(userChoice) {
+            if (round >= maxRounds) {
+                return; // Game is over
+            }
+
+            const computerChoice = getComputerChoice();
+
+            showChoiceImage(userChoice, computerChoice); // Show images for both user and computer - CORE FUNCTION
+
+
+            switch (userChoice + computerChoice) {
+                case "rockscissors":
+                    win(userChoice, computerChoice, "Rock crushes Scissors!");
+                    break;
+                case "paperrock":
+                    win(userChoice, computerChoice, "Paper covers Rock!");
+                    break;
+                case "scissorspaper":
+                    win(userChoice, computerChoice, "Scissors cuts Paper!");
+                    break;
+                case "rockpaper":
+                    lose(userChoice, computerChoice, "Paper covers Rock!");
+                    break;
+                case "paperscissors":
+                    lose(userChoice, computerChoice, "Scissors cuts Paper!");
+                    break;
+                case "scissorsrock":
+                    lose(userChoice, computerChoice, "Rock crushes Scissors!");
+                    break;
+                case "rockrock":
+                    draw(userChoice, computerChoice);
+                    break;
+                case "paperpaper":
+                    draw(userChoice, computerChoice);
+                    break;
+                case "scissorsscissors":
+                    draw(userChoice, computerChoice);
+                    break;
+            }
+
+            round++;
+            roundNumberSpan.innerText = round;
+
+            if (round === maxRounds) {
+                endGame();
+            }
+        }
+
+
+        function win(userChoice, computerChoice, message) {
+            userScore++;
+            userScoreSpan.innerText = userScore;
+            resultMessage.innerText = message + " You win!";
+        }
+
+        function lose(userChoice, computerChoice, message) {
+            computerScore++;
+            computerScoreSpan.innerText = computerScore;
+            resultMessage.innerText = message + " You lose!";
+        }
+
+        function draw(userChoice, computerChoice) {
+            resultMessage.innerText = `It's a draw! You both chose ${userChoice}.`;
+        }
+
+        function playGame(choice) {
+            game(choice);
+        }
+
+        function endGame() {
+            let finalMessage;
+            if (userScore > computerScore) {
+                finalMessage = "Congratulations! You are the final winner!";
+            } else if (computerScore > userScore) {
+                finalMessage = "The computer is the final winner!";
+            } else {
+                finalMessage = "It's a tie game!";
+            }
+
+            gameOverMessage.innerText = finalMessage;
+            finalUserScore.innerText = userScore;
+            finalComputerScore.innerText = computerScore;
+
+            gameOverOverlay.style.display = "flex";
+            document.getElementById("finalWinner").style.display = "block";
+
+            // Save game to history
+            saveGameToHistory(finalMessage);
+        }
+
+        function saveGameToHistory(finalMessage) {
+            const gameResult = {
+                userScore: userScore,
+                computerScore: computerScore,
+                message: finalMessage,
+                timestamp: new Date().toLocaleString()
+            };
+
+            gameHistory.push(gameResult);
+            localStorage.setItem("gameHistory", JSON.stringify(gameHistory));
+        }
+
+        function restartGame() {
+            userScore = 0;
+            computerScore = 0;
+            round = 0;
+            userScoreSpan.innerText = userScore;
+            computerScoreSpan.innerText = computerScore;
+            resultMessage.innerText = "";
+            finalWinnerMessage.style.display = "none";
+            gameOverOverlay.style.display = "none";
+            roundNumberSpan.innerText = 0; // Reset round counter display
+
+             // Reset image displays
+            rockImage.style.display = 'none';
+            paperImage.style.display = 'none';
+            scissorsImage.style.display = 'none';
+            computerChoiceImage.style.display = 'none';
+
+        }
+
+        function showScoreboard() {
+            gameOverOverlay.style.display = "none";
+            scoreboardOverlay.style.display = "flex";
+
+            // Display game history in the scoreboard
+            displayGameHistory();
+        }
+
+        function displayGameHistory() {
+            scoreboardList.innerHTML = ""; // Clear previous list items
+
+            if (gameHistory.length === 0) {
+                const noGamesMessage = document.createElement("li");
+                noGamesMessage.textContent = "No games played yet!";
+                scoreboardList.appendChild(noGamesMessage);
+            } else {
+                gameHistory.forEach((game, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `Game ${index + 1}: ${game.message} - Your Score: ${game.userScore}, Computer Score: ${game.computerScore} (${game.timestamp})`;
+                    scoreboardList.appendChild(listItem);
+                });
+            }
+        }
+
+        function goBack() {
+            scoreboardOverlay.style.display = "none";
+            gameOverOverlay.style.display = "flex";
+        }
+
+        function closeScoreboard() {
+            scoreboardOverlay.style.display = "none";
+            comeBackMessage.style.display = "block";
+            scoreboardButtons.style.display = "flex";
+        }
+
+        function clearScoreboard() {
+            gameHistory = [];
+            localStorage.removeItem("gameHistory");
+            displayGameHistory(); // Update the scoreboard display
+        }
+    </script>
+
+</body>
+
+</html>
